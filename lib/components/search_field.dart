@@ -1,26 +1,34 @@
-import 'package:nba_book_catalogue/providers/book_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class SearchField extends StatelessWidget {
-  const SearchField({super.key, required this.ref});
+class ReusableTextField extends StatelessWidget {
+  final void Function(String)? onChanged;
+  final String hintText;
+  final double maxWidth;
+  final TextEditingController? controller;
+  final TextInputAction textInputAction;
 
-  final WidgetRef ref;
+  const ReusableTextField({
+    super.key,
+    this.onChanged,
+    this.hintText = 'Search',
+    this.maxWidth = 700,
+    this.controller,
+    this.textInputAction = TextInputAction.search,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      constraints: BoxConstraints(maxWidth: 700),
+      constraints: BoxConstraints(maxWidth: maxWidth),
       child: TextField(
-        decoration: const InputDecoration(
-          hintText: 'Search',
-          border: OutlineInputBorder(),
+        controller: controller,
+        decoration: InputDecoration(
+          hintText: hintText,
+          border: const OutlineInputBorder(),
         ),
-        onChanged: (value) {
-          ref.read(bookSearchQueryProvider.notifier).state =
-              value.trim().toLowerCase();
-        },
+        onChanged: onChanged,
+        textInputAction: textInputAction,
       ),
     );
   }

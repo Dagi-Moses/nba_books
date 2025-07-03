@@ -1,4 +1,4 @@
-import 'package:nba_book_catalogue/components/add_book_button.dart';
+import 'package:nba_book_catalogue/components/custom_button.dart';
 import 'package:nba_book_catalogue/components/build_table.dart';
 import 'package:nba_book_catalogue/components/export_button.dart';
 import 'package:nba_book_catalogue/components/search_field.dart';
@@ -9,7 +9,9 @@ import 'package:nba_book_catalogue/providers/subject_provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
+import 'package:nba_book_catalogue/screens/edit_classification_screen.dart';
+import 'package:nba_book_catalogue/screens/edit_subjects_screen.dart';
+import 'package:nba_book_catalogue/utils/modals/show_book_modal.dart';
 
 class BookCatalogPage extends ConsumerStatefulWidget {
   const BookCatalogPage({super.key});
@@ -25,7 +27,7 @@ class _BookCatalogPageState extends ConsumerState<BookCatalogPage> {
     final classifications =
         ref.watch(classificationsProvider).asData?.value ?? [];
     final subjects = ref.watch(subjectsProvider).asData?.value ?? [];
-    final query = ref.watch(bookSearchQueryProvider);
+    final query = ref.watch(bookSearchQueryProvider).trim().toLowerCase();
     final classificationMap = {for (var c in classifications) c.id: c.name};
     final subjectMap = {for (var s in subjects) s.id: s.name};
     final isEditing = ref.watch(isEditingProvider);
@@ -36,12 +38,39 @@ class _BookCatalogPageState extends ConsumerState<BookCatalogPage> {
         centerTitle: true,
         actions: [
           IconButton(
-            color: Colors.amber,
-            icon: Icon(isEditing ? Icons.lock_open : Icons.lock),
-            tooltip: isEditing ? 'Disable Editing' : 'Enable Editing',
+            color: Colors.white,
+            icon: const Icon(Icons.category),
+            tooltip: 'Edit Classifications',
             onPressed: () {
-              ref.read(isEditingProvider.notifier).state = !isEditing;
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const EditClassificationsScreen(),
+                ),
+              );
             },
+          ),
+          IconButton(
+            color: Colors.white,
+            icon: const Icon(Icons.topic_outlined),
+            tooltip: 'Edit Subjects',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const EditSubjectsScreen()),
+              );
+            },
+          ),
+          Padding(
+            padding: const EdgeInsets.only(right: 15),
+            child: IconButton(
+              color: Colors.amber,
+              icon: Icon(isEditing ? Icons.lock_open : Icons.lock),
+              tooltip: isEditing ? 'Disable Editing' : 'Enable Editing',
+              onPressed: () {
+                ref.read(isEditingProvider.notifier).state = !isEditing;
+              },
+            ),
           ),
         ],
       ),
@@ -52,11 +81,22 @@ class _BookCatalogPageState extends ConsumerState<BookCatalogPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                SearchField(ref: ref),
+                ReusableTextField(
+                  onChanged: (value) {
+                    ref.read(bookSearchQueryProvider.notifier).state =
+                        value.trim().toLowerCase();
+                  },
+                ),
 
                 Row(
                   children: [
-                    AddBookButton(),
+                    ReusableActionButton(
+                      label: 'Add Book',
+                      onPressed: () {
+                        showAddBookModal(context);
+                      },
+                    ),
+
                     SizedBox(width: 20),
                     ExportButton(),
                   ],
@@ -72,14 +112,13 @@ class _BookCatalogPageState extends ConsumerState<BookCatalogPage> {
 
                 final filteredBooks =
                     books.where((book) {
-                      final formattedDate =
-                          DateFormat.yMMMd()
-                              .format(book.publicationDate)
-                              .toLowerCase();
+                      final publicationYearStr =
+                          book.publicationDate.toString();
                       return book.title.toLowerCase().contains(query) ||
                           book.author.toLowerCase().contains(query) ||
+                          publicationYearStr.contains(query) ||
                           book.publisher.toLowerCase().contains(query) ||
-                          formattedDate.contains(query) ||
+                          book.isbn.toLowerCase().contains(query) ||
                           classificationMap[book.classificationId]
                                   ?.toLowerCase()
                                   .contains(query) ==

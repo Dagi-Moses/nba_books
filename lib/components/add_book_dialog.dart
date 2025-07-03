@@ -21,9 +21,10 @@ class _AddBookModalState extends ConsumerState<AddBookModal> {
   final _formKey = GlobalKey<FormState>();
 
   final _titleController = TextEditingController();
+  final _isbnController = TextEditingController();
   final _authorController = TextEditingController();
   final _publisherController = TextEditingController();
-  DateTime? _selectedDate;
+  int? _selectedDate;
 
   int? _selectedClassificationId;
   int? _selectedSubjectId;
@@ -38,18 +39,18 @@ class _AddBookModalState extends ConsumerState<AddBookModal> {
 
     try {
       await supabase.from('books').insert({
+        'isbn': _isbnController.text.trim(),
         'title': _titleController.text.trim(),
         'author': _authorController.text.trim(),
         'publisher': _publisherController.text.trim(),
-        'publication_date':
-            _selectedDate?.toIso8601String() ??
-            DateTime.now().toIso8601String(),
+        'publication_date': _selectedDate,
         'classification_id': _selectedClassificationId,
         'subject_id': _selectedSubjectId,
       });
       ref.invalidate(booksProvider);
 
       _titleController.clear();
+      _isbnController.clear();
       _authorController.clear();
       _publisherController.clear();
       setState(() {
@@ -78,25 +79,60 @@ class _AddBookModalState extends ConsumerState<AddBookModal> {
     }
   }
 
+  // Future<void> _pickDate() async {
+  //   final now = DateTime.now();
+  //   final picked = await showDatePicker(
+  //     context: context,
+  //     initialDate: now,
+  //     firstDate: DateTime(1900),
+  //     lastDate: DateTime(now.year + 10),
+  //   );
+  //   if (picked != null) {
+  //     setState(() => _selectedDate = picked);
+  //   }
+  // }
+
   Future<void> _pickDate() async {
     final now = DateTime.now();
-    final picked = await showDatePicker(
+    int selectedYear = _selectedDate ?? now.year;
+
+    await showDialog(
       context: context,
-      initialDate: now,
-      firstDate: DateTime(1900),
-      lastDate: DateTime(now.year + 10),
+      builder: (context) {
+        return AlertDialog(
+          title: Center(
+            child: const Text(
+              'Select Publication Year',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
+          ),
+          content: SizedBox(
+            width: 300,
+            height: 300,
+            child: YearPicker(
+              firstDate: DateTime(1900),
+              lastDate: DateTime(now.year + 10),
+              selectedDate: DateTime(selectedYear),
+              onChanged: (DateTime dateTime) {
+                setState(() {
+                  _selectedDate = dateTime.year;
+                });
+                Navigator.pop(context);
+              },
+            ),
+          ),
+        );
+      },
     );
-    if (picked != null) {
-      setState(() => _selectedDate = picked);
-    }
   }
 
   final _titleFocus = FocusNode();
+  final _isbnFocus = FocusNode();
   final _authorFocus = FocusNode();
   final _publisherFocus = FocusNode();
   @override
   void initState() {
-    _titleFocus.requestFocus();
+    _isbnFocus.requestFocus();
 
     super.initState();
   }
@@ -104,6 +140,7 @@ class _AddBookModalState extends ConsumerState<AddBookModal> {
   @override
   void dispose() {
     _titleFocus.dispose();
+    _isbnFocus.dispose();
     _authorFocus.dispose();
     _publisherFocus.dispose();
 
@@ -126,6 +163,18 @@ class _AddBookModalState extends ConsumerState<AddBookModal> {
               const Text(
                 'Add New Book',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+              CustomTextField(
+                label: 'ISBN',
+                controller: _isbnController,
+                icon: Icons.qr_code,
+                focusNode: _isbnFocus,
+                onSubmitted:
+                    (_) => FocusScope.of(context).requestFocus(_titleFocus),
+                validator:
+                    (val) =>
+                        val == null || val.trim().isEmpty ? 'Required' : null,
               ),
               const SizedBox(height: 12),
               CustomTextField(
@@ -175,12 +224,12 @@ class _AddBookModalState extends ConsumerState<AddBookModal> {
                         text:
                             _selectedDate == null
                                 ? ''
-                                : DateFormat.yMMMd().format(_selectedDate!),
+                                : _selectedDate.toString(),
                       ),
                       icon: Icons.date_range,
                       validator:
                           (val) =>
-                              _selectedDate == null ? 'Select a date' : null,
+                              _selectedDate == null ? 'Select a Year' : null,
                     ),
                   ),
                 ),
