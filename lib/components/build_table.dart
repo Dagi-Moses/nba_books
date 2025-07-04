@@ -63,8 +63,6 @@ class BuildTable extends StatelessWidget {
             final itemName = book.title;
             final bookId = book.id;
 
-            print('Deleting book: $itemName (ID: $bookId)');
-
             deleteItemDialog(context, itemName, () async {
               try {
                 await Supabase.instance.client
@@ -78,7 +76,6 @@ class BuildTable extends StatelessWidget {
                   SnackBar(content: Text('Deleted "$itemName" successfully')),
                 );
               } catch (e) {
-                print('Error deleting book: $e');
                 Navigator.of(context).pop(); // close dialog
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text('Failed to delete "$itemName": $e')),

@@ -16,7 +16,6 @@ class ScreenHelper extends StatelessWidget {
       MediaQuery.of(context).size.width < 800.0;
 
   static bool isTablet(BuildContext context) =>
-      MediaQuery.of(context).size.width >= 800.0 &&
       MediaQuery.of(context).size.width < 1050.0;
 
   static bool isDesktop(BuildContext context) =>
