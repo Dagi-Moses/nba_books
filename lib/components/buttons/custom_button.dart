@@ -5,6 +5,7 @@ class ReusableActionButton extends StatelessWidget {
   final String label;
   final VoidCallback onPressed;
   final Color backgroundColor;
+  final Color foregroundColor;
   final IconData? icon;
 
   const ReusableActionButton({
@@ -12,6 +13,7 @@ class ReusableActionButton extends StatelessWidget {
     required this.label,
     required this.onPressed,
     this.backgroundColor = Colors.blue,
+    this.foregroundColor = Colors.white,
     this.icon,
   });
 
@@ -22,8 +24,9 @@ class ReusableActionButton extends StatelessWidget {
       child: ElevatedButton.icon(
         onPressed: onPressed,
 
-        label: Text(label, style: const TextStyle(color: Colors.white)),
+        label: Text(label, style: TextStyle(color: foregroundColor)),
         style: ElevatedButton.styleFrom(
+          elevation: 10,
           backgroundColor: backgroundColor,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:nba_book_catalogue/components/buttons/custom_button.dart';
+import 'package:nba_book_catalogue/components/custom_list_tile.dart';
 import 'package:nba_book_catalogue/components/delete_confirmation.dart';
 import 'package:nba_book_catalogue/components/search_field.dart';
 import 'package:nba_book_catalogue/providers/text_contoller.dart';
@@ -56,53 +58,58 @@ class ManageTypesPage extends ConsumerWidget {
                             textControllerNotifier.descriptionController,
                       ),
                     ),
-                    Visibility(
-                      visible:
-                          textControllerNotifier
-                              .descriptionController
-                              .text
-                              .isNotEmpty ||
-                          textControllerNotifier.selectedId != null,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Visibility(
-                            visible:
-                                textControllerNotifier
-                                    .descriptionText
-                                    .isNotEmpty,
-                            child: CustomButton(
-                              label:
-                                  textControllerNotifier.selectedId == null
-                                      ? 'Add'
-                                      : 'Update',
-                              onPressed: () {
-                                if (textControllerNotifier.selectedId == null) {
-                                  onItemAdded();
-                                } else {
-                                  onItemUpdated();
-                                  textControllerNotifier.selectedId = null;
-                                  textControllerNotifier.descriptionController
-                                      .clear();
-                                }
-                              },
-                              color: Colors.green,
-                            ),
+                    ValueListenableBuilder<TextEditingValue>(
+                      valueListenable:
+                          textControllerNotifier.descriptionController,
+                      builder: (context, value, child) {
+                        final showButtons =
+                            value.text.isNotEmpty ||
+                            textControllerNotifier.selectedId != null;
+                        return Visibility(
+                          visible: showButtons,
+
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              ReusableActionButton(
+                                label:
+                                    textControllerNotifier.selectedId == null
+                                        ? 'Add'
+                                        : 'Update',
+                                onPressed: () {
+                                  if (textControllerNotifier.selectedId ==
+                                      null) {
+                                    onItemAdded();
+                                  } else {
+                                    onItemUpdated();
+                                    textControllerNotifier.selectedId = null;
+                                    textControllerNotifier.descriptionController
+                                        .clear();
+                                  }
+                                },
+                                backgroundColor: Colors.green,
+                              ),
+                              Visibility(
+                                visible:
+                                    textControllerNotifier.selectedId != null,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: ReusableActionButton(
+                                    label: 'Cancel',
+                                    onPressed: () {
+                                      textControllerNotifier.selectedId = null;
+                                      textControllerNotifier
+                                          .descriptionController
+                                          .clear();
+                                    },
+                                    backgroundColor: Colors.grey,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                          Visibility(
-                            visible: textControllerNotifier.selectedId != null,
-                            child: CustomButton(
-                              label: 'Cancel',
-                              onPressed: () {
-                                textControllerNotifier.selectedId = null;
-                                textControllerNotifier.descriptionController
-                                    .clear();
-                              },
-                              color: Colors.grey,
-                            ),
-                          ),
-                        ],
-                      ),
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -118,6 +125,9 @@ class ManageTypesPage extends ConsumerWidget {
                 const SizedBox(height: 10),
                 Expanded(
                   child: ListView.builder(
+                    padding: EdgeInsets.only(right: 50),
+                    shrinkWrap: true,
+                    //  physics: const NeverScrollableScrollPhysics(),
                     itemCount: items.length,
                     itemBuilder: (context, index) {
                       int typeId = items.keys.elementAt(index);
@@ -142,81 +152,6 @@ class ManageTypesPage extends ConsumerWidget {
               ],
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class CustomButton extends StatelessWidget {
-  final String label;
-  final VoidCallback onPressed;
-  final Color color;
-
-  const CustomButton({
-    Key? key,
-    required this.label,
-    required this.onPressed,
-    required this.color,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: SizedBox(
-        width: 100,
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: color,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-          onPressed: onPressed,
-          child: Text(label, style: const TextStyle(color: Colors.white)),
-        ),
-      ),
-    );
-  }
-}
-
-class CustomListItem extends StatelessWidget {
-  final String title;
-  final VoidCallback onEdit;
-  final VoidCallback onDelete;
-
-  const CustomListItem({
-    Key? key,
-    required this.title,
-    required this.onEdit,
-    required this.onDelete,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        title: Text(
-          title,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-        ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.edit, color: Colors.blue),
-              onPressed: onEdit,
-            ),
-            IconButton(
-              icon: const Icon(Icons.delete, color: Colors.red),
-              onPressed: onDelete,
-            ),
-          ],
         ),
       ),
     );

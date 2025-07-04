@@ -1,6 +1,7 @@
-import 'package:nba_book_catalogue/components/custom_button.dart';
+import 'package:nba_book_catalogue/components/buttons/custom_button.dart';
 import 'package:nba_book_catalogue/components/build_table.dart';
-import 'package:nba_book_catalogue/components/export_button.dart';
+import 'package:nba_book_catalogue/components/buttons/export_button.dart';
+import 'package:nba_book_catalogue/components/buttons/import_button.dart';
 import 'package:nba_book_catalogue/components/search_field.dart';
 import 'package:nba_book_catalogue/data_sources/book_data_source.dart';
 import 'package:nba_book_catalogue/providers/book_provider.dart';
@@ -11,7 +12,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nba_book_catalogue/screens/edit_classification_screen.dart';
 import 'package:nba_book_catalogue/screens/edit_subjects_screen.dart';
+import 'package:nba_book_catalogue/services/import_excel.dart';
 import 'package:nba_book_catalogue/utils/modals/show_book_modal.dart';
+import 'package:nba_book_catalogue/utils/screen_helper.dart';
 
 class BookCatalogPage extends ConsumerStatefulWidget {
   const BookCatalogPage({super.key});
@@ -77,32 +80,44 @@ class _BookCatalogPageState extends ConsumerState<BookCatalogPage> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            Flex(
+              direction:
+                  ScreenHelper.isTablet(context)
+                      ? Axis.vertical
+                      : Axis.horizontal,
+              mainAxisAlignment:
+                  ScreenHelper.isTablet(context)
+                      ? MainAxisAlignment.start
+                      : MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Search Field
                 ReusableTextField(
                   onChanged: (value) {
                     ref.read(bookSearchQueryProvider.notifier).state =
                         value.trim().toLowerCase();
                   },
                 ),
+                SizedBox(height: 10),
+                // Buttons section
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
 
-                Row(
                   children: [
                     ReusableActionButton(
                       label: 'Add Book',
-                      onPressed: () {
-                        showAddBookModal(context);
-                      },
+                      onPressed: () => showAddBookModal(context),
                     ),
-
-                    SizedBox(width: 20),
+                    ImportButton(),
                     ExportButton(),
                   ],
                 ),
               ],
             ),
+
             const SizedBox(height: 16),
             booksAsync.when(
               data: (books) {
@@ -144,7 +159,7 @@ class _BookCatalogPageState extends ConsumerState<BookCatalogPage> {
                   ),
                 );
               },
-              loading: () => CircularProgressIndicator(),
+              loading: () => Center(child: CircularProgressIndicator()),
 
               error: (e, st) {
                 final isNetworkError =

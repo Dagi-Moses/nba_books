@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:nba_book_catalogue/models/classification_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -56,10 +58,37 @@ class ClassificationsNotifier
               .single();
       final id = response['id'] as int;
       final newClassification = Classification(id: id, name: description);
-
+      Fluttertoast.showToast(
+        msg: "Classification Added",
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.green,
+        textColor: Colors.white,
+      );
       state = state.whenData((list) => [...list, newClassification]);
     } catch (e, st) {
-      state = AsyncError(e, st);
+      final errorMessage = e.toString();
+      if (errorMessage.contains(
+        'duplicate key value violates unique constraint',
+      )) {
+        debugPrint('Classification "$description" already exists.');
+        Fluttertoast.showToast(
+          msg: 'Classification "$description" already exists.',
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+        );
+      } else {
+        Fluttertoast.showToast(
+          msg: e.toString(),
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+        );
+        state = AsyncError(e, st);
+      }
     }
   }
 
@@ -77,16 +106,52 @@ class ClassificationsNotifier
           return classification;
         }).toList();
       });
+
+      Fluttertoast.showToast(
+        msg: "Classification updated successfully.",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+      );
     } catch (e, st) {
+      final errorMessage = e.toString();
+
+      if (errorMessage.contains('duplicate key value') ||
+          errorMessage.contains('Duplicate')) {
+        Fluttertoast.showToast(
+          msg: "A classification with this name already exists.",
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.BOTTOM,
+        );
+        return;
+      }
+
+      Fluttertoast.showToast(
+        msg: "Error updating classification: ${e.toString()}",
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.BOTTOM,
+      );
+
       state = AsyncError(e, st);
     }
   }
 
-  Future<void> deleteClassification(int id) async {
+  Future<void> deleteClassification(int id, BuildContext context) async {
     try {
       await supabase.from('classifications').delete().eq('id', id);
       state = state.whenData((list) => list.where((c) => c.id != id).toList());
+      Navigator.pop(context);
+
+      Fluttertoast.showToast(
+        msg: "Subject deleted successfully.",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+      );
     } catch (e, st) {
+      Fluttertoast.showToast(
+        msg: "Error deleting subject: ${e.toString()}",
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.BOTTOM,
+      );
       state = AsyncError(e, st);
     }
   }

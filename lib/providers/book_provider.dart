@@ -11,7 +11,10 @@ final isEditingProvider = StateProvider<bool>((ref) => false);
 final booksProvider = StreamProvider<List<Book>>((ref) {
   final stream = supabase.from('books').stream(primaryKey: ['id']);
   return stream.map((rows) {
-    final books = rows.map(Book.fromMap).toList();
+    final books =
+        rows.map(Book.fromMap).toList()..sort(
+          (a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()),
+        );
 
     return books;
   });

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:nba_book_catalogue/components/delete_confirmation.dart';
+import 'package:nba_book_catalogue/components/footer.dart';
 import 'package:nba_book_catalogue/data_sources/book_data_source.dart';
 import 'package:nba_book_catalogue/services/export.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -38,6 +39,7 @@ class BuildTable extends StatelessWidget {
       gridLinesVisibility: GridLinesVisibility.both,
       headerGridLinesVisibility: GridLinesVisibility.both,
       editingGestureType: EditingGestureType.tap,
+      footer: BooksFooter(totalBooks: dataSource.books.length),
 
       allowSorting: true,
       endSwipeActionsBuilder: (
@@ -46,26 +48,24 @@ class BuildTable extends StatelessWidget {
         int rowIndex,
       ) {
         return GestureDetector(
-          onTap: () {
-            final itemName =
-                row
-                    .getCells()
-                    .firstWhere((cell) => cell.columnName == 'title')
-                    .value
-                    .toString();
+          onTap: () async {
+            final book = dataSource.getBookAtRow(rowIndex);
+
+            if (book == null) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Error: Could not find book data'),
+                ),
+              );
+              return;
+            }
+
+            final itemName = book.title;
+            final bookId = book.id;
+
+            print('Deleting book: $itemName (ID: $bookId)');
 
             deleteItemDialog(context, itemName, () async {
-              print('Row index: $rowIndex');
-              print('Total books: ${dataSource.books.length}');
-              print('Row data: ${dataSource.books[rowIndex]}');
-
-              final bookId =
-                  row
-                      .getCells()
-                      .firstWhere((c) => c.columnName == 'id')
-                      .value
-                      .toString();
-              print('Book id: $bookId');
               try {
                 await Supabase.instance.client
                     .from('books')
@@ -73,11 +73,12 @@ class BuildTable extends StatelessWidget {
                     .eq('id', bookId);
 
                 Navigator.of(context).pop(); // close dialog
+
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text('Deleted "$itemName" successfully')),
                 );
               } catch (e) {
-                print(e.toString());
+                print('Error deleting book: $e');
                 Navigator.of(context).pop(); // close dialog
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text('Failed to delete "$itemName": $e')),

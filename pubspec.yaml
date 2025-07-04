@@ -1,10 +1,11 @@
 name: nba_book_catalogue
 description: >
   A Flutter web and desktop app for managing a legal department’s book catalog,
-  replacing manual Excel tracking with a searchable, filterable, and sortable system.
-  Built with Flutter, Riverpod, Supabase, and Syncfusion DataGrid, it supports
-  classification tagging, subjects, publication date tracking, inline editing with
-  dropdowns and date pickers, and export to Excel/PDF for structured library management.
+  replacing manual Excel tracking with a searchable, filterable, and sortable
+  system. Built with Flutter, Riverpod, Supabase, and Syncfusion DataGrid, it
+  supports classification tagging, subjects, publication date tracking, inline
+  editing with dropdowns and date pickers, and export to Excel/PDF for
+  structured library management.
 
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -41,6 +42,7 @@ dependencies:
     sdk: flutter
   flutter_dotenv: ^5.2.1
   flutter_riverpod: ^2.6.1
+  flutter_speed_dial: ^7.0.0
   fluttertoast: ^8.2.12
   intl: ^0.20.2
   pdf: ^3.11.3

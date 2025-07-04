@@ -36,11 +36,6 @@ class EditClassificationsScreen extends ConsumerWidget {
                 .read(classificationsProvider.notifier)
                 .addClassification(text);
             typeEditor.clear();
-            if (context.mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Classification added')),
-              );
-            }
           },
           onItemUpdated: () async {
             final text = typeEditor.descriptionText.trim();
@@ -50,21 +45,11 @@ class EditClassificationsScreen extends ConsumerWidget {
                 .read(classificationsProvider.notifier)
                 .updateClassification(id, text);
             typeEditor.clear();
-            if (context.mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Classification updated')),
-              );
-            }
           },
           onItemDeleted: (id) async {
             await ref
                 .read(classificationsProvider.notifier)
-                .deleteClassification(id);
-            if (context.mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Classification deleted')),
-              );
-            }
+                .deleteClassification(id, context);
           },
         );
       },
