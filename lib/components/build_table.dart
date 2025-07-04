@@ -22,8 +22,8 @@ class BuildTable extends StatelessWidget {
       source: dataSource,
       key: exportKey,
       navigationMode: GridNavigationMode.cell,
-      columnWidthMode: ColumnWidthMode.fill,
 
+      //   columnWidthMode: ColumnWidthMode.fill,
       selectionMode: SelectionMode.singleDeselect,
 
       allowEditing: isEditing,
@@ -39,6 +39,7 @@ class BuildTable extends StatelessWidget {
       gridLinesVisibility: GridLinesVisibility.both,
       headerGridLinesVisibility: GridLinesVisibility.both,
       editingGestureType: EditingGestureType.tap,
+      columnWidthMode: ColumnWidthMode.none,
       footer: BooksFooter(totalBooks: dataSource.books.length),
 
       allowSorting: true,
@@ -93,6 +94,9 @@ class BuildTable extends StatelessWidget {
       columns: <GridColumn>[
         GridColumn(
           columnName: 'isbn',
+          columnWidthMode: ColumnWidthMode.fill,
+          maximumWidth: 300,
+          minimumWidth: 120,
           label: Padding(
             padding: const EdgeInsets.only(left: 8.0),
             child: Text('ISBN', style: TextStyle(fontWeight: FontWeight.bold)),
@@ -100,6 +104,9 @@ class BuildTable extends StatelessWidget {
         ),
         GridColumn(
           columnName: 'title',
+          columnWidthMode: ColumnWidthMode.fill,
+          maximumWidth: 300,
+          minimumWidth: 120,
           label: Padding(
             padding: const EdgeInsets.only(left: 8.0),
             child: Text('Title', style: TextStyle(fontWeight: FontWeight.bold)),
@@ -107,6 +114,9 @@ class BuildTable extends StatelessWidget {
         ),
         GridColumn(
           columnName: 'author',
+          maximumWidth: 300,
+          minimumWidth: 120,
+          columnWidthMode: ColumnWidthMode.fill,
           label: Padding(
             padding: const EdgeInsets.only(left: 8.0),
             child: Text(
@@ -118,7 +128,9 @@ class BuildTable extends StatelessWidget {
 
         GridColumn(
           maximumWidth: 100,
+          minimumWidth: 120,
           columnName: 'dateOfPublication',
+
           label: Padding(
             padding: const EdgeInsets.only(left: 8.0),
             child: Text('Date ', style: TextStyle(fontWeight: FontWeight.bold)),
@@ -126,6 +138,9 @@ class BuildTable extends StatelessWidget {
         ),
         GridColumn(
           columnName: 'publisher',
+          maximumWidth: 300,
+          minimumWidth: 120,
+          columnWidthMode: ColumnWidthMode.fill,
           label: Padding(
             padding: const EdgeInsets.only(left: 8.0),
             child: Text(
@@ -136,6 +151,9 @@ class BuildTable extends StatelessWidget {
         ),
         GridColumn(
           columnName: 'classification',
+          maximumWidth: 300,
+          minimumWidth: 120,
+          columnWidthMode: ColumnWidthMode.fill,
           label: Padding(
             padding: const EdgeInsets.only(left: 8.0),
             child: Text(
@@ -146,6 +164,9 @@ class BuildTable extends StatelessWidget {
         ),
         GridColumn(
           columnName: 'subject',
+          maximumWidth: 300,
+          minimumWidth: 120,
+          columnWidthMode: ColumnWidthMode.fill,
           label: Padding(
             padding: const EdgeInsets.only(left: 8.0),
             child: Text(
